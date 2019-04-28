@@ -55,7 +55,7 @@
             this.toolStripSeparator1,
             this.exitGifshotToolStripMenuItem});
             this.notifContextMenu.Name = "notifContextMenu";
-            this.notifContextMenu.Size = new System.Drawing.Size(151, 76);
+            this.notifContextMenu.Size = new System.Drawing.Size(181, 98);
             // 
             // autostartToolStripMenuItem
             // 
@@ -65,7 +65,7 @@
             this.autostartToolStripMenuItem.Name = "autostartToolStripMenuItem";
             this.autostartToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.autostartToolStripMenuItem.Text = "Autostart";
-            this.autostartToolStripMenuItem.Click += new System.EventHandler(this.autostartToolStripMenuItem_Click);
+            this.autostartToolStripMenuItem.CheckedChanged += new System.EventHandler(this.autostartToolStripMenuItem_CheckedChanged);
             // 
             // showWindowToolStripMenuItem
             // 
