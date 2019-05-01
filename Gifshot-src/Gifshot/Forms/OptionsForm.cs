@@ -164,7 +164,7 @@ namespace Gifshot
                 Variables.runningOverlayForms.Add(overlayForms[screenIndex]); //add form to global list
                 overlayForms[screenIndex].StartPosition = FormStartPosition.Manual;
                 overlayForms[screenIndex].SetBounds(screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height); //set the form to screen position
-                screenshots.Add(TakeScreenshot(screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Size)); //take screenshot of current screen
+                screenshots.Add(TakeScreenshot(screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height)); //take screenshot of current screen
                 overlayForms[screenIndex].BackgroundImage = screenshots[screenIndex]; //set it to the right form
                 overlayForms[screenIndex].BackgroundImageLayout = ImageLayout.Zoom;
                 overlayForms[screenIndex].Show();  // show the form
@@ -172,12 +172,12 @@ namespace Gifshot
             }
         }
 
-        private Image TakeScreenshot(int x, int y, Size size)
+        private Image TakeScreenshot(int x, int y, int width, int height)
         {
-            Bitmap screenshot = new Bitmap(Size.Width, Size.Height, PixelFormat.Format32bppArgb); // create the Bitmap
+            Bitmap screenshot = new Bitmap(width, height, PixelFormat.Format32bppArgb); // create the Bitmap
             Graphics g = Graphics.FromImage(screenshot); //take bitmap
 
-            g.CopyFromScreen(x, y, 0, 0, size);
+            g.CopyFromScreen(x, y,0,0, new Size(width, height), CopyPixelOperation.SourceCopy);
             
             return screenshot;
         }
