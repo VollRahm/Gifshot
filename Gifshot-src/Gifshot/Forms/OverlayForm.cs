@@ -21,16 +21,25 @@ namespace Gifshot
         {
             if(e.KeyCode == Keys.Escape)
             {
-                foreach (OverlayForm form in Variables.runningOverlayForms)
-                {
-                    if (form == this) continue; //skip if its the current one
-                    form.Hide();
-                    form.Dispose();
-                }
-                Variables.runningOverlayForms.Clear();
-                this.Hide();
-                this.Dispose();
+                DisableAllOverlays();
             }
+            if(e.Alt)
+            {
+                DisableAllOverlays();
+            }
+        }
+
+        private void DisableAllOverlays()
+        {
+            foreach (OverlayForm form in Variables.runningOverlayForms)
+            {
+                if (form == this) continue; //skip if its the current one
+                form.Hide();
+                form.Dispose();
+            }
+            Variables.runningOverlayForms.Clear();
+            this.Hide();
+            this.Dispose();
         }
     }
 }

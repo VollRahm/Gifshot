@@ -164,7 +164,7 @@ namespace Gifshot
                 Variables.runningOverlayForms.Add(overlayForms[screenIndex]); //add form to global list
                 overlayForms[screenIndex].StartPosition = FormStartPosition.Manual;
                 overlayForms[screenIndex].SetBounds(screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height); //set the form to screen position
-                screenshots.Add(TakeScreenshot(screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height)); //take screenshot of current screen
+                screenshots.Add(TakeScreenshot(screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height, 0.62f)); //take screenshot of current screen, decrease contrast
                 overlayForms[screenIndex].BackgroundImage = screenshots[screenIndex]; //set it to the right form
                 overlayForms[screenIndex].BackgroundImageLayout = ImageLayout.Zoom;
                 overlayForms[screenIndex].Show();  // show the form
@@ -172,14 +172,42 @@ namespace Gifshot
             }
         }
 
-        private Image TakeScreenshot(int x, int y, int width, int height)
+        private Image TakeScreenshot(int x, int y, int width, int height, float contrast = 1f)
         {
             Bitmap screenshot = new Bitmap(width, height, PixelFormat.Format32bppArgb); // create the Bitmap
             Graphics g = Graphics.FromImage(screenshot); //take bitmap
 
-            g.CopyFromScreen(x, y,0,0, new Size(width, height), CopyPixelOperation.SourceCopy);
+            g.CopyFromScreen(x, y,0,0, new Size(width, height), CopyPixelOperation.SourceCopy); //make screenshot of region
+
+            return DarkenImage(screenshot, contrast);
             
-            return screenshot;
+        }
+
+        private Bitmap DarkenImage(Bitmap originalImage, float contrast)
+        {
+            Bitmap adjustedImage = new Bitmap(originalImage.Width, originalImage.Height);
+            float brightness = 1.0f;
+             
+            float gamma = 1.0f; // no change in gamma
+
+            float adjustedBrightness = brightness - 1.0f;
+            // create matrix that will brighten and contrast the image
+            float[][] ptsArray ={
+        new float[] {contrast, 0, 0, 0, 0}, // scale red
+        new float[] {0, contrast, 0, 0, 0}, // scale green
+        new float[] {0, 0, contrast, 0, 0}, // scale blue
+        new float[] {0, 0, 0, 1.0f, 0}, // don't scale alpha
+        new float[] {adjustedBrightness, adjustedBrightness, adjustedBrightness, 0, 1}};
+
+            ImageAttributes imageAttributes = new ImageAttributes();
+            imageAttributes.ClearColorMatrix();
+            imageAttributes.SetColorMatrix(new ColorMatrix(ptsArray), ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+            imageAttributes.SetGamma(gamma, ColorAdjustType.Bitmap);
+            Graphics g = Graphics.FromImage(adjustedImage);
+            g.DrawImage(originalImage, new Rectangle(0, 0, adjustedImage.Width, adjustedImage.Height)
+                , 0, 0, originalImage.Width, originalImage.Height,
+                GraphicsUnit.Pixel, imageAttributes);
+            return adjustedImage;
         }
 
 
