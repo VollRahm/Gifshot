@@ -11,6 +11,7 @@ namespace Gifshot
     {
         public const string ConfigFilepath = "gifshot.conf";
 
+        public static List<OverlayForm> runningOverlayForms = new List<OverlayForm>();
 
         public static string standardConfigFile =
             "#Please don't change anything inside here, it could break the program." + Environment.NewLine+

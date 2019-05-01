@@ -71,7 +71,7 @@
             // 
             this.showWindowToolStripMenuItem.Name = "showWindowToolStripMenuItem";
             this.showWindowToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.showWindowToolStripMenuItem.Text = "Show Window";
+            this.showWindowToolStripMenuItem.Text = "Settings...";
             this.showWindowToolStripMenuItem.Click += new System.EventHandler(this.showWindowToolStripMenuItem_Click);
             // 
             // toolStripSeparator1

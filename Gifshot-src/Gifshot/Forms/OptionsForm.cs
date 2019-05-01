@@ -3,18 +3,27 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Win32;
+using MouseKeyboardLibrary;
+
 
 namespace Gifshot
 {
     public partial class OptionsForm : Form
     {
         public bool firstStartup;
+        RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+        SettingsForm settingsFrm = new SettingsForm();
+
+        KeyboardHook keyboardHook = new KeyboardHook();
 
         public OptionsForm()
         {
@@ -22,6 +31,13 @@ namespace Gifshot
             InitializeComponent();
             LoadConfigFile();
         }
+
+        private void SetupKBHook()
+        {
+            keyboardHook.KeyUp += new KeyEventHandler(KeyPressedGlobally);
+            keyboardHook.Start();
+        }
+
 
         #region Form Hiders
 
@@ -41,26 +57,25 @@ namespace Gifshot
             notifIcon.ShowBalloonTip(1500, "Gifshot", "Gifshot running. Click the icon to set Autostart", ToolTipIcon.Info); //show notification
 
             #region Check Autostart Status
-            using (RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
+
+            if (rk.GetValue(this.Text) == null)
             {
-                if (rk.GetValue(this.Text) == null)
-                {
-                    Config.isAutostart = false; //if theres no value theres no autostart
-                    autostartToolStripMenuItem.Checked = Config.isAutostart;
-                }
-                else
-                {
-                    Config.isAutostart = true;
-                    autostartToolStripMenuItem.Checked = Config.isAutostart;
-                }
+                Config.isAutostart = false; //if theres no value theres no autostart
+                autostartToolStripMenuItem.Checked = Config.isAutostart;
             }
+            else
+            {
+                Config.isAutostart = true;
+                autostartToolStripMenuItem.Checked = Config.isAutostart;
+            }
+            
             #endregion //This needs to go here otherwise Windows Defender randomly throws an error
 
-            await Task.Delay(2000); //wait until Form is hidden
+            await Task.Delay(500); //wait until Form is hidden
             this.Location = new Point(
                 new Random().Next(Screen.PrimaryScreen.Bounds.Left + 100, Screen.PrimaryScreen.Bounds.Width - Screen.PrimaryScreen.Bounds.Width / 2),
                 new Random().Next(Screen.PrimaryScreen.Bounds.Top + 100, Screen.PrimaryScreen.Bounds.Height - Screen.PrimaryScreen.Bounds.Height / 2));  //reset location to random point on 
-
+            SetupKBHook(); //Start Keyboard hook after windows is initialized
             
         }
 
@@ -75,28 +90,18 @@ namespace Gifshot
 
         private void showWindowToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //to-do: Add the "Make Screenshot" Method
-            this.ShowInTaskbar = true;
-            this.Visible = true;
-            this.Show();
+            settingsFrm.Show();
         }
 
         private void autostartToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
             if(!autostartToolStripMenuItem.Checked && Config.isAutostart)
             {
-                using (RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
-                {
-                    rk.DeleteValue(this.Text); //delete Key if autostart is enabled and it was disabled
-                }
-                
+                   rk.DeleteValue(this.Text); //delete Key if autostart is enabled and it was disabled
             }
             else
             {
-                using (RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
-                {
                     rk.SetValue(this.Text, Application.ExecutablePath); //add autostart
-                }
             }
         }
 
@@ -134,14 +139,50 @@ namespace Gifshot
                     writer.WriteLine(Variables.standardConfigFile); //write new config
                 }
 
-                using (RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
-                {
                     rk.SetValue(this.Text, Application.ExecutablePath); //set autostart on first startup
-                }
+                
             }
         }
 
+        private void KeyPressedGlobally(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Config.hotkey)
+            {
+                ShowOverlaysOnScreens();
+            }
+        }
 
-        
+        private void ShowOverlaysOnScreens()
+        {
+            List<OverlayForm> overlayForms = new List<OverlayForm>(); //Create a Dictionary for multiple monitors with monitor name
+            List<Image> screenshots = new List<Image>(); //Dictionary for the images on the screens
+
+            int screenIndex = 0;
+            foreach(Screen screen in Screen.AllScreens)
+            {
+                overlayForms.Add(new OverlayForm()); //create new form for screen
+                Variables.runningOverlayForms.Add(overlayForms[screenIndex]); //add form to global list
+                overlayForms[screenIndex].StartPosition = FormStartPosition.Manual;
+                overlayForms[screenIndex].SetBounds(screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height); //set the form to screen position
+                screenshots.Add(TakeScreenshot(screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Size)); //take screenshot of current screen
+                overlayForms[screenIndex].BackgroundImage = screenshots[screenIndex]; //set it to the right form
+                overlayForms[screenIndex].BackgroundImageLayout = ImageLayout.Zoom;
+                overlayForms[screenIndex].Show();  // show the form
+                screenIndex++; //next *clap* screen *clap*
+            }
+        }
+
+        private Image TakeScreenshot(int x, int y, Size size)
+        {
+            Bitmap screenshot = new Bitmap(Size.Width, Size.Height, PixelFormat.Format32bppArgb); // create the Bitmap
+            Graphics g = Graphics.FromImage(screenshot); //take bitmap
+
+            g.CopyFromScreen(x, y, 0, 0, size);
+            
+            return screenshot;
+        }
+
+
+
     }
 }
