@@ -68,7 +68,7 @@ namespace Gifshot
             if (e.Button == MouseButtons.Left)
             {
                 isMouseDown = false;
-                CopyScreenshotToClipboard();
+                UploadScreenshotToImgur();
             }
         }
 
@@ -104,13 +104,13 @@ namespace Gifshot
             return bmp;
         }
 
-        private void UploadScreenshotToImgur()
+        private async void UploadScreenshotToImgur()
         {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                CropImage(screenshot, selectionRect).Save(ms, ImageFormat.Png);
-                Clipboard.SetText(new Imgur("ImgurClientIDhere").UploadImageAnonymous(ms, "Screenshot-" + DateTime.Now.ToShortDateString() + DateTime.Now.ToShortTimeString(), "", "Made with Gifshot").Result.Link);
-            }
+            Image croppedImage = CropImage(screenshot, selectionRect); //crop screenshot
+            Clipboard.SetText((await new Imgur("your imgur key here").UploadImageAnonymous(new MemoryStream((byte[])new ImageConverter().ConvertTo(croppedImage, typeof(byte[]))), "", "", "")).Link); //Upload Screenshot to byte array to memory stream via ImgurSharp
+            DisableAllOverlays();
         }
+
+        
     }
 }
