@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace ImgurSharp
 {
     public class ImgurRequestError
     {
+        // The Errors can apparently be strings or json objects.
         [JsonProperty("error")]
-        public string Error { get; set; }
+        public object Error { get; set; }
         [JsonProperty("request")]
         public string Request { get; set; }
         [JsonProperty("method")]

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ImgurSharp
@@ -11,18 +12,23 @@ namespace ImgurSharp
     public class Imgur
     {
         #region Properties
-        public string AppId { get; set; }
-        public string BaseUrl = "https://api.imgur.com/3/";
+        private readonly string clientId;
+        private const string baseUrl = "https://api.imgur.com/3/";
         #endregion
 
         #region Constructor
         /// <summary>
         /// Constructor of Imgur object
         /// </summary>
-        /// <param name="applicationId">Id of application, so Imgur knows which app is submitting data</param>
-        public Imgur(string applicationId)
+        /// <param name="clientId">Id of application, so Imgur knows which app is submitting data</param>
+        public Imgur(string clientId)
         {
-            AppId = applicationId;
+            this.clientId = clientId;
+
+            if (string.IsNullOrWhiteSpace(clientId))
+            {
+                throw new Exception("clientID is not set, please specify");
+            }
         }
         #endregion
 
@@ -43,13 +49,17 @@ namespace ImgurSharp
 
                 string base64Image = PhotoStreamToBase64(imageStream);
 
-                var formContent = new FormUrlEncodedContent(new[] { 
-                    new KeyValuePair<string, string>("image", base64Image),
-                    new KeyValuePair<string, string>("name", name),
-                    new KeyValuePair<string, string>("title", title),
-                    new KeyValuePair<string, string>("description", description)
+                var jsonData = JsonConvert.SerializeObject(new
+                {
+                    image = base64Image,
+                    name,
+                    title,
+                    description
                 });
-                HttpResponseMessage response = await client.PostAsync(new Uri(BaseUrl + "upload"), formContent);
+
+                var jsonContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                HttpResponseMessage response = await client.PostAsync(new Uri(baseUrl + "upload"), jsonContent);
+
                 await CheckHttpStatusCode(response);
                 string content = await response.Content.ReadAsStringAsync();
 
@@ -71,12 +81,12 @@ namespace ImgurSharp
             using (HttpClient client = new HttpClient())
             {
                 SetHeaders(client);
-                var formContent = new FormUrlEncodedContent(new[] { 
+                var formContent = new FormUrlEncodedContent(new[] {
                     new KeyValuePair<string, string>("image", url),
                     new KeyValuePair<string, string>("name", name),
                     new KeyValuePair<string, string>("title", title),
                     new KeyValuePair<string, string>("description", description) });
-                HttpResponseMessage response = await client.PostAsync(new Uri(BaseUrl + "upload"), formContent);
+                HttpResponseMessage response = await client.PostAsync(new Uri(baseUrl + "upload"), formContent);
                 await CheckHttpStatusCode(response);
                 string content = await response.Content.ReadAsStringAsync();
                 ImgurRootObject<ImgurImage> imgRoot = JsonConvert.DeserializeObject<ImgurRootObject<ImgurImage>>(content);
@@ -95,7 +105,7 @@ namespace ImgurSharp
             {
                 SetHeaders(client);
 
-                HttpResponseMessage response = await client.DeleteAsync(new Uri(BaseUrl + "image/" + deleteHash));
+                HttpResponseMessage response = await client.DeleteAsync(new Uri(baseUrl + "image/" + deleteHash));
                 await CheckHttpStatusCode(response);
                 string content = await response.Content.ReadAsStringAsync();
                 ImgurRootObject<bool> deleteRoot = JsonConvert.DeserializeObject<ImgurRootObject<bool>>(content);
@@ -116,12 +126,12 @@ namespace ImgurSharp
             {
                 SetHeaders(client);
 
-                var formContent = new FormUrlEncodedContent(new[] { 
+                var formContent = new FormUrlEncodedContent(new[] {
                     new KeyValuePair<string, string>("description", description),
                     new KeyValuePair<string, string>("title", title)
                  });
 
-                HttpResponseMessage response = await client.PutAsync(new Uri(BaseUrl + "image/" + deleteHash), formContent);
+                HttpResponseMessage response = await client.PutAsync(new Uri(baseUrl + "image/" + deleteHash), formContent);
                 await CheckHttpStatusCode(response);
                 string content = await response.Content.ReadAsStringAsync();
                 ImgurRootObject<bool> deleteRoot = JsonConvert.DeserializeObject<ImgurRootObject<bool>>(content);
@@ -146,7 +156,7 @@ namespace ImgurSharp
             {
                 SetHeaders(client);
 
-                var formContent = new FormUrlEncodedContent(new[] { 
+                var formContent = new FormUrlEncodedContent(new[] {
                     new KeyValuePair<string, string>("ids", imageIds.Aggregate((a,b) => a + "," + b)),
                     new KeyValuePair<string, string>("title", title),
                     new KeyValuePair<string, string>("description", description),
@@ -155,7 +165,7 @@ namespace ImgurSharp
                     new KeyValuePair<string, string>("cover", coverImageId),
                  });
 
-                HttpResponseMessage response = await client.PostAsync(new Uri(BaseUrl + "album"), formContent);
+                HttpResponseMessage response = await client.PostAsync(new Uri(baseUrl + "album"), formContent);
                 await CheckHttpStatusCode(response);
                 string content = await response.Content.ReadAsStringAsync();
 
@@ -181,7 +191,7 @@ namespace ImgurSharp
             {
                 SetHeaders(client);
 
-                var formContent = new FormUrlEncodedContent(new[] { 
+                var formContent = new FormUrlEncodedContent(new[] {
                     new KeyValuePair<string, string>("ids", imageIds.Aggregate((a,b) => a + "," + b)),
                     new KeyValuePair<string, string>("title", title),
                     new KeyValuePair<string, string>("description", description),
@@ -190,7 +200,7 @@ namespace ImgurSharp
                     new KeyValuePair<string, string>("cover", cover),
                  });
 
-                HttpResponseMessage response = await client.PutAsync(new Uri(BaseUrl + "album/" + deleteHash), formContent);
+                HttpResponseMessage response = await client.PutAsync(new Uri(baseUrl + "album/" + deleteHash), formContent);
                 await CheckHttpStatusCode(response);
                 string content = await response.Content.ReadAsStringAsync();
 
@@ -210,7 +220,7 @@ namespace ImgurSharp
             {
                 SetHeaders(client);
 
-                HttpResponseMessage response = await client.DeleteAsync(new Uri(BaseUrl + "album/" + deleteHash));
+                HttpResponseMessage response = await client.DeleteAsync(new Uri(baseUrl + "album/" + deleteHash));
                 await CheckHttpStatusCode(response);
                 string content = await response.Content.ReadAsStringAsync();
                 ImgurRootObject<bool> deleteRoot = JsonConvert.DeserializeObject<ImgurRootObject<bool>>(content);
@@ -230,11 +240,11 @@ namespace ImgurSharp
             {
                 SetHeaders(client);
 
-                var formContent = new FormUrlEncodedContent(new[] { 
+                var formContent = new FormUrlEncodedContent(new[] {
                     new KeyValuePair<string, string>("ids", imageIds.Aggregate((a,b) => a + "," + b))
                 });
 
-                HttpResponseMessage response = await client.PostAsync(new Uri(BaseUrl + "album/" + deleteHash), formContent);
+                HttpResponseMessage response = await client.PostAsync(new Uri(baseUrl + "album/" + deleteHash), formContent);
 
                 await CheckHttpStatusCode(response);
                 string content = await response.Content.ReadAsStringAsync();
@@ -256,7 +266,7 @@ namespace ImgurSharp
             {
                 SetHeaders(client);
 
-                HttpResponseMessage response = await client.DeleteAsync(new Uri(BaseUrl + "album/" + deleteHash + "/remove_images?ids=" + imageIds.Aggregate((a, b) => a + "," + b)));
+                HttpResponseMessage response = await client.DeleteAsync(new Uri(baseUrl + "album/" + deleteHash + "/remove_images?ids=" + imageIds.Aggregate((a, b) => a + "," + b)));
                 await CheckHttpStatusCode(response);
                 string content = await response.Content.ReadAsStringAsync();
                 ImgurRootObject<bool> removeRoot = JsonConvert.DeserializeObject<ImgurRootObject<bool>>(content);
@@ -274,7 +284,7 @@ namespace ImgurSharp
             using (HttpClient client = new HttpClient())
             {
                 SetHeaders(client);
-                HttpResponseMessage response = await client.GetAsync(new Uri(BaseUrl + "album/" + albumId));
+                HttpResponseMessage response = await client.GetAsync(new Uri(baseUrl + "album/" + albumId));
                 await CheckHttpStatusCode(response);
                 string content = await response.Content.ReadAsStringAsync();
 
@@ -293,7 +303,7 @@ namespace ImgurSharp
             using (HttpClient client = new HttpClient())
             {
                 SetHeaders(client);
-                HttpResponseMessage response = await client.GetAsync(new Uri(BaseUrl + "image/" + imageId));
+                HttpResponseMessage response = await client.GetAsync(new Uri(baseUrl + "image/" + imageId));
                 await CheckHttpStatusCode(response);
                 string content = await response.Content.ReadAsStringAsync();
 
@@ -307,28 +317,17 @@ namespace ImgurSharp
         #region Helpers
         void SetHeaders(HttpClient client)
         {
-            if (string.IsNullOrWhiteSpace(AppId))
-                throw new Exception("AppId is not set, please specify");
-
-            client.DefaultRequestHeaders.Add("Authorization", "Client-ID " + AppId);
+            client.DefaultRequestHeaders.Add("Authorization", "Client-ID " + clientId);
         }
 
         string PhotoStreamToBase64(Stream stream)
         {
-            MemoryStream memoryStream = new MemoryStream();
-            stream.CopyTo(memoryStream);
-            byte[] result = memoryStream.ToArray();
-
-            string base64img = System.Convert.ToBase64String(result);
-            return base64img;
-            //StringBuilder sb = new StringBuilder();
-
-            //for (int i = 0; i < base64img.Length; i += 32766)
-            //{
-            //    sb.Append(Uri.EscapeDataString(base64img.Substring(i, Math.Min(32766, base64img.Length - i))));
-            //}
-
-            //return sb.ToString();
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                stream.CopyTo(memoryStream);
+                byte[] result = memoryStream.ToArray();
+                return System.Convert.ToBase64String(result);
+            }
         }
 
         string GetNameFromEnum<T>(int selected) where T : struct
@@ -351,28 +350,17 @@ namespace ImgurSharp
             {
                 errorRoot = JsonConvert.DeserializeObject<ImgurRootObject<ImgurRequestError>>(content);
             }
-            catch (Exception)
-            {
-
-            }
+            catch (Exception) { }
 
             if (errorRoot == null)
                 return;
 
-            switch ((int)responseMessage.StatusCode)
+            if ((int)responseMessage.StatusCode / 100 > 2)
             {
-                case 400:
-                case 401:
-                case 403:
-                case 404:
-                case 429:
-                case 500:
-                    throw new Exception(string.Format(" Error: {0} \n Request: {1} \n Verb: {2} ", errorRoot.Data.Error, errorRoot.Data.Request, errorRoot.Data.Method));
-                case 200:
-                default:
-                    return;
-
+                throw new Exception(string.Format(" Error: {0} \n Request: {1} \n Verb: {2} ", errorRoot.Data.Error, errorRoot.Data.Request, errorRoot.Data.Method));
             }
+
+            return;
         }
         #endregion
     }
