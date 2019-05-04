@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ImgurSharp;
 
 namespace Gifshot
 {
@@ -101,9 +104,13 @@ namespace Gifshot
             return bmp;
         }
 
-        private void CopyScreenshotToClipboard()
+        private void UploadScreenshotToImgur()
         {
-            Clipboard.SetImage(CropImage(screenshot, selectionRect));
+            using (MemoryStream ms = new MemoryStream())
+            {
+                CropImage(screenshot, selectionRect).Save(ms, ImageFormat.Png);
+                Clipboard.SetText(new Imgur("ImgurClientIDhere").UploadImageAnonymous(ms, "Screenshot-" + DateTime.Now.ToShortDateString() + DateTime.Now.ToShortTimeString(), "", "Made with Gifshot").Result.Link);
+            }
         }
     }
 }
