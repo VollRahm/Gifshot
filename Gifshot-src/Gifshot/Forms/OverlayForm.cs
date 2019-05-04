@@ -12,9 +12,14 @@ namespace Gifshot
 {
     public partial class OverlayForm : Form
     {
-        public OverlayForm()
+        Graphics formG;
+
+        public Bitmap screenshot; //passed in screenshot
+
+        public OverlayForm(Bitmap _screenshot)
         {
             InitializeComponent();
+            screenshot = _screenshot;
         }
 
         private void OverlayForm_KeyDown(object sender, KeyEventArgs e)
@@ -40,6 +45,65 @@ namespace Gifshot
             Variables.runningOverlayForms.Clear();
             this.Hide();
             this.Dispose();
+        }
+
+        private void OverlayForm_MouseDown(object sender, MouseEventArgs e)
+        {
+            if(e.Button == MouseButtons.Left)
+            {
+                formG = this.CreateGraphics();
+                isMouseDown = true; //set bool true if mouse holding
+                upperleftSelection = e.Location; //sets start location
+                
+            }
+        }
+
+
+
+        private void OverlayForm_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isMouseDown = false;
+                CopyScreenshotToClipboard();
+            }
+        }
+
+        private bool isMouseDown = false; //bool to tell if user is holding the mouse
+        Point upperleftSelection;
+        Pen pen = new Pen(Color.Red, 3);
+
+        Point lastPosition = new Point(0, 0);
+        Rectangle selectionRect;
+
+        private void OverlayForm_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isMouseDown && e.Location != lastPosition) //check if user is holding mouse and moved it
+            {
+                selectionRect = new Rectangle(upperleftSelection, new Size(e.X - upperleftSelection.X, e.Y - upperleftSelection.Y));
+                this.Refresh(); //delete old rectangle
+                formG.DrawRectangle(pen, selectionRect); // draw new one form start point to current location
+                lastPosition = e.Location; //sets the same location to check next time
+            }
+        }
+
+        public Bitmap CropImage(Bitmap source, Rectangle section) //image crop method from https://stackoverflow.com/questions/9484935/how-to-cut-a-part-of-image-in-c-sharp
+        {
+            // An empty bitmap which will hold the cropped image
+            Bitmap bmp = new Bitmap(section.Width, section.Height);
+
+            Graphics g = Graphics.FromImage(bmp);
+
+            // Draw the given area (section) of the source image
+            // at location 0,0 on the empty bitmap (bmp)
+            g.DrawImage(source, 0, 0, section, GraphicsUnit.Pixel);
+
+            return bmp;
+        }
+
+        private void CopyScreenshotToClipboard()
+        {
+            Clipboard.SetImage(CropImage(screenshot, selectionRect));
         }
     }
 }

@@ -46,6 +46,7 @@
             this.notifIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("notifIcon.Icon")));
             this.notifIcon.Text = "Gifshot";
             this.notifIcon.Visible = true;
+            this.notifIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifIcon_MouseClick);
             // 
             // notifContextMenu
             // 
@@ -55,7 +56,7 @@
             this.toolStripSeparator1,
             this.exitGifshotToolStripMenuItem});
             this.notifContextMenu.Name = "notifContextMenu";
-            this.notifContextMenu.Size = new System.Drawing.Size(181, 98);
+            this.notifContextMenu.Size = new System.Drawing.Size(134, 76);
             // 
             // autostartToolStripMenuItem
             // 
@@ -63,26 +64,26 @@
             this.autostartToolStripMenuItem.CheckOnClick = true;
             this.autostartToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.autostartToolStripMenuItem.Name = "autostartToolStripMenuItem";
-            this.autostartToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.autostartToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.autostartToolStripMenuItem.Text = "Autostart";
             this.autostartToolStripMenuItem.CheckedChanged += new System.EventHandler(this.autostartToolStripMenuItem_CheckedChanged);
             // 
             // showWindowToolStripMenuItem
             // 
             this.showWindowToolStripMenuItem.Name = "showWindowToolStripMenuItem";
-            this.showWindowToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.showWindowToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.showWindowToolStripMenuItem.Text = "Settings...";
             this.showWindowToolStripMenuItem.Click += new System.EventHandler(this.showWindowToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(130, 6);
             // 
             // exitGifshotToolStripMenuItem
             // 
             this.exitGifshotToolStripMenuItem.Name = "exitGifshotToolStripMenuItem";
-            this.exitGifshotToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exitGifshotToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.exitGifshotToolStripMenuItem.Text = "Exit Gifshot";
             this.exitGifshotToolStripMenuItem.Click += new System.EventHandler(this.exitGifshotToolStripMenuItem_Click);
             // 

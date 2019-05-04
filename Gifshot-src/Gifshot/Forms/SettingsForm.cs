@@ -21,7 +21,6 @@ namespace Gifshot
         public bool firstStartup;
         RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
-        SettingsForm settingsFrm = new SettingsForm();
 
         KeyboardHook keyboardHook = new KeyboardHook();
 
@@ -90,7 +89,7 @@ namespace Gifshot
 
         private void showWindowToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            settingsFrm.Show();
+            this.Show();
         }
 
         private void autostartToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
@@ -103,6 +102,12 @@ namespace Gifshot
             {
                     rk.SetValue(this.Text, Application.ExecutablePath); //add autostart
             }
+        }
+
+        private void notifIcon_MouseClick(object sender, MouseEventArgs e)
+        {
+            if(e.Button == MouseButtons.Left)
+            ShowOverlaysOnScreens();
         }
 
         #endregion
@@ -155,31 +160,31 @@ namespace Gifshot
         private void ShowOverlaysOnScreens()
         {
             List<OverlayForm> overlayForms = new List<OverlayForm>(); //Create a Dictionary for multiple monitors with monitor name
-            List<Image> screenshots = new List<Image>(); //Dictionary for the images on the screens
+            List<Bitmap> screenshots = new List<Bitmap>(); //Dictionary for the images on the screens
 
             int screenIndex = 0;
             foreach(Screen screen in Screen.AllScreens)
             {
-                overlayForms.Add(new OverlayForm()); //create new form for screen
+                screenshots.Add(TakeScreenshot(screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height)); //take screenshot of current screen
+                overlayForms.Add(new OverlayForm(screenshots[screenIndex])); //create new form for screen and pass in screenshot
                 Variables.runningOverlayForms.Add(overlayForms[screenIndex]); //add form to global list
                 overlayForms[screenIndex].StartPosition = FormStartPosition.Manual;
                 overlayForms[screenIndex].SetBounds(screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height); //set the form to screen position
-                screenshots.Add(TakeScreenshot(screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height, 0.62f)); //take screenshot of current screen, decrease contrast
-                overlayForms[screenIndex].BackgroundImage = screenshots[screenIndex]; //set it to the right form
+                overlayForms[screenIndex].BackgroundImage = DarkenImage(screenshots[screenIndex], 0.62f); //set background image for the form and decrease contrast
                 overlayForms[screenIndex].BackgroundImageLayout = ImageLayout.Zoom;
                 overlayForms[screenIndex].Show();  // show the form
                 screenIndex++; //next *clap* screen *clap*
             }
         }
 
-        private Image TakeScreenshot(int x, int y, int width, int height, float contrast = 1f)
+        private Bitmap TakeScreenshot(int x, int y, int width, int height)
         {
             Bitmap screenshot = new Bitmap(width, height, PixelFormat.Format32bppArgb); // create the Bitmap
             Graphics g = Graphics.FromImage(screenshot); //take bitmap
 
             g.CopyFromScreen(x, y,0,0, new Size(width, height), CopyPixelOperation.SourceCopy); //make screenshot of region
 
-            return DarkenImage(screenshot, contrast);
+            return screenshot;
             
         }
 
@@ -191,6 +196,7 @@ namespace Gifshot
             float gamma = 1.0f; // no change in gamma
 
             float adjustedBrightness = brightness - 1.0f;
+
             // create matrix that will brighten and contrast the image
             float[][] ptsArray ={
         new float[] {contrast, 0, 0, 0, 0}, // scale red
@@ -210,7 +216,6 @@ namespace Gifshot
             return adjustedImage;
         }
 
-
-
+        
     }
 }
