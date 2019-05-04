@@ -54,6 +54,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
+    <Compile Include="ImgurSharp\Imgur.cs" />
+    <Compile Include="ImgurSharp\ImgurAlbum.cs" />
+    <Compile Include="ImgurSharp\ImgurAlbumLayout.cs" />
+    <Compile Include="ImgurSharp\ImgurAlbumPrivacy.cs" />
+    <Compile Include="ImgurSharp\ImgurCreateAlbum.cs" />
+    <Compile Include="ImgurSharp\ImgurImage.cs" />
+    <Compile Include="ImgurSharp\ImgurRequestError.cs" />
+    <Compile Include="ImgurSharp\ImgurRootObject.cs" />
     <Compile Include="InputHooks\GlobalHook.cs" />
     <Compile Include="InputHooks\KeyboardHook.cs" />
     <Compile Include="Forms\SettingsForm.cs">

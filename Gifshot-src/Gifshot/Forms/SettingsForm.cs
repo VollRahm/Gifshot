@@ -181,7 +181,7 @@ namespace Gifshot
         {
             Bitmap screenshot = new Bitmap(width, height, PixelFormat.Format32bppArgb); // create the Bitmap
             Graphics g = Graphics.FromImage(screenshot); //take bitmap
-
+            
             g.CopyFromScreen(x, y,0,0, new Size(width, height), CopyPixelOperation.SourceCopy); //make screenshot of region
 
             return screenshot;
