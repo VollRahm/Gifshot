@@ -144,7 +144,7 @@ namespace Gifshot
                     writer.WriteLine(Variables.standardConfigFile); //write new config
                 }
 
-                    rk.SetValue(this.Text, Application.ExecutablePath); //set autostart on first startup
+                rk.SetValue(this.Text, Application.ExecutablePath); //set autostart on first startup
                 
             }
         }

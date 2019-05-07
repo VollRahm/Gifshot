@@ -68,7 +68,7 @@ namespace Gifshot
             if (e.Button == MouseButtons.Left)
             {
                 isMouseDown = false;
-                UploadScreenshotToImgur();
+                //todo show form
             }
         }
 
@@ -104,12 +104,7 @@ namespace Gifshot
             return bmp;
         }
 
-        private async void UploadScreenshotToImgur()
-        {
-            Image croppedImage = CropImage(screenshot, selectionRect); //crop screenshot
-            Clipboard.SetText((await new Imgur("your imgur key here").UploadImageAnonymous(new MemoryStream((byte[])new ImageConverter().ConvertTo(croppedImage, typeof(byte[]))), "", "", "")).Link); //Upload Screenshot to byte array to memory stream via ImgurSharp
-            DisableAllOverlays();
-        }
+      
 
         
     }
