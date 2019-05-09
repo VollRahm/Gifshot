@@ -10,8 +10,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ImgurSharp;
+using Gifshot.Forms;
 
-namespace Gifshot
+namespace Gifshot.Forms
 {
     public partial class OverlayForm : Form
     {

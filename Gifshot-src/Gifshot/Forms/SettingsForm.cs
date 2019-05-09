@@ -12,11 +12,12 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using MouseKeyboardLibrary;
+using Gifshot.Forms;
 
 
-namespace Gifshot
+namespace Gifshot.Forms
 {
-    public partial class OptionsForm : Form
+    public partial class SettingsForm : Form
     {
         public bool firstStartup;
         RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
@@ -24,7 +25,7 @@ namespace Gifshot
 
         KeyboardHook keyboardHook = new KeyboardHook();
 
-        public OptionsForm()
+        public SettingsForm()
         {
             HideFormOnStartup();
             InitializeComponent();

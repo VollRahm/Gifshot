@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Gifshot.Forms;
 
 namespace Gifshot
 {
@@ -16,7 +17,7 @@ namespace Gifshot
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new OptionsForm());
+            Application.Run(new SettingsForm());
         }
     }
 }

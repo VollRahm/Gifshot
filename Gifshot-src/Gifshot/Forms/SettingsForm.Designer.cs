@@ -1,6 +1,6 @@
-﻿namespace Gifshot
+﻿namespace Gifshot.Forms
 {
-    partial class OptionsForm
+    partial class SettingsForm
     {
         /// <summary>
         /// Erforderliche Designervariable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OptionsForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
             this.notifIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.notifContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.autostartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();

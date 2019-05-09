@@ -1,4 +1,4 @@
-﻿namespace Gifshot
+﻿namespace Gifshot.Forms
 {
     partial class OverlayForm
     {
