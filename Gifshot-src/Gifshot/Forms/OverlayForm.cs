@@ -9,14 +9,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ImgurSharp;
 using Gifshot.Forms;
 
 namespace Gifshot.Forms
 {
     public partial class OverlayForm : Form
     {
-        Graphics formG;
+        //Graphics formG;
 
         public Bitmap screenshot; //passed in screenshot
 
@@ -24,38 +23,39 @@ namespace Gifshot.Forms
         {
             InitializeComponent();
             screenshot = _screenshot;
+            
         }
 
         private void OverlayForm_KeyDown(object sender, KeyEventArgs e)
         {
             if(e.KeyCode == Keys.Escape)
             {
-                DisableAllOverlays();
+                MainForm.inst.DisableAllOverlays();
             }
             if(e.Alt)
             {
-                DisableAllOverlays();
+                MainForm.inst.DisableAllOverlays();
+            }
+
+            if (selectionRect != null && isMouseDown == false)
+            {
+                if (e.KeyCode == Keys.C && e.Control)
+                {
+                    MainForm.inst.Func_copyToClipBoardBtn_Click(this, null);
+                }
+                if (e.KeyCode == Keys.S && e.Control)
+                {
+                    MainForm.inst.Func_saveImageBtn_Click(this, null);
+                }
             }
         }
 
-        private void DisableAllOverlays()
-        {
-            foreach (OverlayForm form in Variables.runningOverlayForms)
-            {
-                if (form == this) continue; //skip if its the current one
-                form.Hide();
-                form.Dispose();
-            }
-            Variables.runningOverlayForms.Clear();
-            this.Hide();
-            this.Dispose();
-        }
 
         private void OverlayForm_MouseDown(object sender, MouseEventArgs e)
         {
             if(e.Button == MouseButtons.Left)
             {
-                formG = this.CreateGraphics();
+                MainForm.inst.Hide();
                 isMouseDown = true; //set bool true if mouse holding
                 upperleftSelection = e.Location; //sets start location
                 
@@ -68,8 +68,12 @@ namespace Gifshot.Forms
         {
             if (e.Button == MouseButtons.Left)
             {
+                this.TopMost = false;
                 isMouseDown = false;
-                //todo show form
+                Bitmap croppedScreen = CropImage(screenshot, selectionRect);
+                MainForm.inst.currentScreenshot = croppedScreen;
+                MainForm.inst.Show();
+                MainForm.inst.Focus();
             }
         }
 
@@ -86,7 +90,8 @@ namespace Gifshot.Forms
             {
                 selectionRect = new Rectangle(upperleftSelection, new Size(e.X - upperleftSelection.X, e.Y - upperleftSelection.Y));
                 this.Refresh(); //delete old rectangle
-                formG.DrawRectangle(pen, selectionRect); // draw new one form start point to current location
+                using (Graphics formG = this.CreateGraphics())
+                    formG.DrawRectangle(pen, selectionRect); // draw new one form start point to current location
                 lastPosition = e.Location; //sets the same location to check next time
             }
         }

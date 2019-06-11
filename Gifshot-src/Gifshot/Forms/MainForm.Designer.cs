@@ -1,6 +1,6 @@
 ﻿namespace Gifshot.Forms
 {
-    partial class SettingsForm
+    partial class MainForm
     {
         /// <summary>
         /// Erforderliche Designervariable.
@@ -29,14 +29,15 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.notifIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.notifContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.autostartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showWindowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitGifshotToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.label1 = new System.Windows.Forms.Label();
+            this.func_saveImageBtn = new System.Windows.Forms.Button();
+            this.func_copyToClipBoardBtn = new System.Windows.Forms.Button();
             this.notifContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -87,31 +88,57 @@
             this.exitGifshotToolStripMenuItem.Text = "Exit Gifshot";
             this.exitGifshotToolStripMenuItem.Click += new System.EventHandler(this.exitGifshotToolStripMenuItem_Click);
             // 
-            // label1
+            // func_saveImageBtn
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(12, 46);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(242, 13);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "(Icon designed by Freepik from www.flaticon.com)";
+            this.func_saveImageBtn.BackColor = System.Drawing.Color.Transparent;
+            this.func_saveImageBtn.BackgroundImage = global::Gifshot.Properties.Resources.save_file_button;
+            this.func_saveImageBtn.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.func_saveImageBtn.FlatAppearance.BorderColor = System.Drawing.Color.Black;
+            this.func_saveImageBtn.FlatAppearance.BorderSize = 0;
+            this.func_saveImageBtn.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Turquoise;
+            this.func_saveImageBtn.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Aquamarine;
+            this.func_saveImageBtn.ForeColor = System.Drawing.Color.Transparent;
+            this.func_saveImageBtn.Location = new System.Drawing.Point(1, 1);
+            this.func_saveImageBtn.Name = "func_saveImageBtn";
+            this.func_saveImageBtn.Size = new System.Drawing.Size(35, 35);
+            this.func_saveImageBtn.TabIndex = 2;
+            this.func_saveImageBtn.UseVisualStyleBackColor = false;
+            this.func_saveImageBtn.Click += new System.EventHandler(this.Func_saveImageBtn_Click);
             // 
-            // OptionsForm
+            // func_copyToClipBoardBtn
+            // 
+            this.func_copyToClipBoardBtn.BackColor = System.Drawing.Color.Transparent;
+            this.func_copyToClipBoardBtn.BackgroundImage = global::Gifshot.Properties.Resources.copy_to_clipboard;
+            this.func_copyToClipBoardBtn.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.func_copyToClipBoardBtn.FlatAppearance.BorderColor = System.Drawing.Color.Black;
+            this.func_copyToClipBoardBtn.FlatAppearance.BorderSize = 0;
+            this.func_copyToClipBoardBtn.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Turquoise;
+            this.func_copyToClipBoardBtn.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Aquamarine;
+            this.func_copyToClipBoardBtn.ForeColor = System.Drawing.Color.Transparent;
+            this.func_copyToClipBoardBtn.Location = new System.Drawing.Point(33, 1);
+            this.func_copyToClipBoardBtn.Name = "func_copyToClipBoardBtn";
+            this.func_copyToClipBoardBtn.Size = new System.Drawing.Size(35, 35);
+            this.func_copyToClipBoardBtn.TabIndex = 2;
+            this.func_copyToClipBoardBtn.UseVisualStyleBackColor = false;
+            this.func_copyToClipBoardBtn.Click += new System.EventHandler(this.Func_copyToClipBoardBtn_Click);
+            // 
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(393, 68);
-            this.Controls.Add(this.label1);
+            this.ClientSize = new System.Drawing.Size(396, 37);
+            this.Controls.Add(this.func_copyToClipBoardBtn);
+            this.Controls.Add(this.func_saveImageBtn);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.Name = "OptionsForm";
+            this.Name = "MainForm";
             this.Text = "Gifshot";
+            this.TopMost = true;
             this.Shown += new System.EventHandler(this.OptionsForm_Shown);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             this.notifContextMenu.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -123,7 +150,8 @@
         private System.Windows.Forms.ToolStripMenuItem showWindowToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem exitGifshotToolStripMenuItem;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button func_saveImageBtn;
+        private System.Windows.Forms.Button func_copyToClipBoardBtn;
     }
 }
 

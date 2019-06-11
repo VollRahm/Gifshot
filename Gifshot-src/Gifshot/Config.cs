@@ -10,7 +10,7 @@ namespace Gifshot
     public static class Config
     {
         public static bool isAutostart = true;
-        public static Keys hotkey = Keys.Print;
+        public static Keys hotkey = Keys.PrintScreen;
         
     }
 }

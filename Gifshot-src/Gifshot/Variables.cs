@@ -16,6 +16,6 @@ namespace Gifshot
 
         public static string standardConfigFile =
             "#Please don't change anything inside here, it could break the program." + Environment.NewLine+
-            "hotkey=42";
+            $"hotkey={((int)Config.hotkey).ToString()}";
     }
 }

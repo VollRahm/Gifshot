@@ -17,19 +17,22 @@ using Gifshot.Forms;
 
 namespace Gifshot.Forms
 {
-    public partial class SettingsForm : Form
+    public partial class MainForm : Form
     {
         public bool firstStartup;
         RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+        public static MainForm inst; //public link to this form
 
+        public Bitmap currentScreenshot; //screenshot that will passed in
 
         KeyboardHook keyboardHook = new KeyboardHook();
 
-        public SettingsForm()
+        public MainForm()
         {
             HideFormOnStartup();
             InitializeComponent();
             LoadConfigFile();
+            inst = this;
         }
 
         private void SetupKBHook()
@@ -178,11 +181,24 @@ namespace Gifshot.Forms
             }
         }
 
+        public void DisableAllOverlays()
+        {
+            foreach (OverlayForm form in Variables.runningOverlayForms)
+            {
+                form.screenshot.Dispose();
+                form.Hide();
+                form.Dispose();
+            }
+            Variables.runningOverlayForms.Clear();
+            this.Hide();
+            GC.Collect(); //clean RAM
+
+        }
+
         private Bitmap TakeScreenshot(int x, int y, int width, int height)
         {
             Bitmap screenshot = new Bitmap(width, height, PixelFormat.Format32bppArgb); // create the Bitmap
-            Graphics g = Graphics.FromImage(screenshot); //take bitmap
-            
+            using (Graphics g = Graphics.FromImage(screenshot)) //take bitmap
             g.CopyFromScreen(x, y,0,0, new Size(width, height), CopyPixelOperation.SourceCopy); //make screenshot of region
 
             return screenshot;
@@ -210,13 +226,83 @@ namespace Gifshot.Forms
             imageAttributes.ClearColorMatrix();
             imageAttributes.SetColorMatrix(new ColorMatrix(ptsArray), ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
             imageAttributes.SetGamma(gamma, ColorAdjustType.Bitmap);
-            Graphics g = Graphics.FromImage(adjustedImage);
-            g.DrawImage(originalImage, new Rectangle(0, 0, adjustedImage.Width, adjustedImage.Height)
-                , 0, 0, originalImage.Width, originalImage.Height,
-                GraphicsUnit.Pixel, imageAttributes);
+            using (Graphics g = Graphics.FromImage(adjustedImage))
+            {
+                g.DrawImage(originalImage, new Rectangle(0, 0, adjustedImage.Width, adjustedImage.Height)
+                    , 0, 0, originalImage.Width, originalImage.Height,
+                    GraphicsUnit.Pixel, imageAttributes);
+            }
             return adjustedImage;
         }
+  
 
-        
+        public void Func_saveImageBtn_Click(object sender, EventArgs e)
+        {
+            this.TopMost = false;
+            SaveFileDialog saveFileDialog = new SaveFileDialog()
+            {
+                DefaultExt = ".png",
+                FileName = "screenshot"
+            };
+            
+            saveFileDialog.Title = "Save screenshot to...";
+            saveFileDialog.AddExtension = true;
+            saveFileDialog.Filter = 
+                "Portable Network Graphic (*.png)|*.png|" + //0
+                "JPEG-File (*.jpg)|*.jpg|" + //1
+                "Bitmap Image (*.bmp)|*bmp|" + //2
+                "Icon-File (*.ico)|*ico"; //3
+
+            DialogResult result = saveFileDialog.ShowDialog();
+
+            if(result == DialogResult.OK)
+            {
+                string savePath = saveFileDialog.FileName;
+
+                switch (saveFileDialog.FilterIndex)
+                {
+                    case 0:
+                        currentScreenshot.Save(savePath, ImageFormat.Png);
+                        break;
+                    case 1:
+                        currentScreenshot.Save(savePath, ImageFormat.Jpeg);
+                        break;
+                    case 2:
+                        currentScreenshot.Save(savePath, ImageFormat.Bmp);
+                        break;
+                    case 3:
+                        currentScreenshot.Save(savePath, ImageFormat.Icon);
+                        break;
+                    default:
+                        currentScreenshot.Save(savePath, ImageFormat.Png);
+                        break;
+                }
+                currentScreenshot = null;
+                DisableAllOverlays();
+                this.TopMost = true;
+                
+            }
+        }
+
+
+        public void Func_copyToClipBoardBtn_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetImage(currentScreenshot);
+            currentScreenshot = null;
+            DisableAllOverlays();
+        }
+
+        private void MainForm_KeyDown(object sender, KeyEventArgs e)
+        {
+
+            if(e.KeyCode == Keys.C && e.Control)
+            {
+                Func_copyToClipBoardBtn_Click(this, null);
+            }
+            if (e.KeyCode == Keys.S && e.Control)
+            {
+                Func_saveImageBtn_Click(this, null);
+            }
+        }
     }
 }
