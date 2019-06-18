@@ -13,7 +13,7 @@ using System.Windows.Forms;
 using Microsoft.Win32;
 using MouseKeyboardLibrary;
 using Gifshot.Forms;
-
+using Newtonsoft.Json;
 
 namespace Gifshot.Forms
 {
@@ -25,6 +25,8 @@ namespace Gifshot.Forms
 
         public Bitmap currentScreenshot; //screenshot that will passed in
 
+        public static Config config = new Config();
+
         KeyboardHook keyboardHook = new KeyboardHook();
 
         public MainForm()
@@ -35,14 +37,7 @@ namespace Gifshot.Forms
             inst = this;
         }
 
-        private void SetupKBHook()
-        {
-            keyboardHook.KeyUp += new KeyEventHandler(KeyPressedGlobally);
-            keyboardHook.Start();
-        }
-
-
-        #region Form Hiders
+        #region Startup Methods
 
         private void HideFormOnStartup()
         {
@@ -52,34 +47,44 @@ namespace Gifshot.Forms
           
         }
 
+        bool isAutostart = true;
+
         private async void OptionsForm_Shown(object sender, EventArgs e)
         {
             this.Hide(); //this.Hide() only works after OptionsForm_Shown()
             this.Visible = false;   //instantly hide the form after its shown
-            if(firstStartup)//only show notification if its the first startup
-            notifIcon.ShowBalloonTip(1500, "Gifshot", "Gifshot running. Click the icon to set Autostart", ToolTipIcon.Info); //show notification
-
-            #region Check Autostart Status
-
-            if (rk.GetValue(this.Text) == null)
-            {
-                Config.isAutostart = false; //if theres no value theres no autostart
-                autostartToolStripMenuItem.Checked = Config.isAutostart;
-            }
-            else
-            {
-                Config.isAutostart = true;
-                autostartToolStripMenuItem.Checked = Config.isAutostart;
-            }
             
-            #endregion //This needs to go here otherwise Windows Defender randomly throws an error
-
-            await Task.Delay(500); //wait until Form is hidden
+            await Task.Delay(300); //wait until Form is hidden
             this.Location = new Point(
                 new Random().Next(Screen.PrimaryScreen.Bounds.Left + 100, Screen.PrimaryScreen.Bounds.Width - Screen.PrimaryScreen.Bounds.Width / 2),
                 new Random().Next(Screen.PrimaryScreen.Bounds.Top + 100, Screen.PrimaryScreen.Bounds.Height - Screen.PrimaryScreen.Bounds.Height / 2));  //reset location to random point on 
+
             SetupKBHook(); //Start Keyboard hook after windows is initialized
-            
+            GetAutostart();//This needs to go here otherwise Windows Defender randomly throws an error
+            if (firstStartup)//only show notification if its the first startup
+                notifIcon.ShowBalloonTip(1500, "Gifshot", "Gifshot running. Right-Click the icon to set Autostart", ToolTipIcon.Info); //show notification
+        }
+
+
+        private void GetAutostart()
+        {
+            if (rk.GetValue(this.Text) == null)
+            {
+                isAutostart = false; //if theres no value theres no autostart
+                autostartToolStripMenuItem.Checked = isAutostart;
+            }
+            else
+            {
+                isAutostart = true;
+                autostartToolStripMenuItem.Checked = isAutostart;
+                if (isAutostart) rk.SetValue(this.Text, Application.ExecutablePath); //update Autostart path
+            }
+        }
+
+        private void SetupKBHook()
+        {
+            keyboardHook.KeyUp += new KeyEventHandler(KeyPressedGlobally);
+            keyboardHook.Start();
         }
 
         #endregion
@@ -98,7 +103,7 @@ namespace Gifshot.Forms
 
         private void autostartToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
-            if(!autostartToolStripMenuItem.Checked && Config.isAutostart)
+            if(!autostartToolStripMenuItem.Checked && isAutostart)
             {
                    rk.DeleteValue(this.Text); //delete Key if autostart is enabled and it was disabled
             }
@@ -124,28 +129,22 @@ namespace Gifshot.Forms
 
                 using (StreamReader reader = new StreamReader(Variables.ConfigFilepath)) //read config
                 {
-                    while (!reader.EndOfStream) //read every line
-                    {
-                        string currentLine = reader.ReadLine(); // get one line of the config
-                        if (currentLine[0] == '#') continue; //skip line if the first character is '#' (commented)
-
-
-                        if (currentLine.Contains("hotkey="))// if its the hotkey line
-                        {
-                            Config.hotkey = (Keys)int.Parse(currentLine.Split('=')[1]); //Parse the number and cast it to a WinForms Key
-                        }
-                    }
+                    string jsonConfig = reader.ReadToEnd(); //read entire json file
+                    config = JsonConvert.DeserializeObject<Config>(jsonConfig); //convert it into the class
                 }
                 
-               
+                
+
             }
             else
             {
                 firstStartup = true; //no config = first startup
 
-                using (StreamWriter writer = new StreamWriter(Variables.ConfigFilepath))//create new config
+                string jsonConfig = JsonConvert.SerializeObject(config);
+                Directory.CreateDirectory(Path.GetDirectoryName(Variables.ConfigFilepath));
+                using (StreamWriter writer = new StreamWriter(Variables.ConfigFilepath))//create new config file
                 {
-                    writer.WriteLine(Variables.standardConfigFile); //write new config
+                    writer.Write(jsonConfig); //write new config
                 }
 
                 rk.SetValue(this.Text, Application.ExecutablePath); //set autostart on first startup
@@ -155,7 +154,7 @@ namespace Gifshot.Forms
 
         private void KeyPressedGlobally(object sender, KeyEventArgs e)
         {
-            if(e.KeyCode == Config.hotkey)
+            if(e.KeyCode == config.hotkey)
             {
                 ShowOverlaysOnScreens();
             }
@@ -175,6 +174,7 @@ namespace Gifshot.Forms
                 overlayForms[screenIndex].StartPosition = FormStartPosition.Manual;
                 overlayForms[screenIndex].SetBounds(screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height); //set the form to screen position
                 overlayForms[screenIndex].BackgroundImage = DarkenImage(screenshots[screenIndex], 0.62f); //set background image for the form and decrease contrast
+                overlayForms[screenIndex].darkenedScreenshot = overlayForms[screenIndex].BackgroundImage;
                 overlayForms[screenIndex].BackgroundImageLayout = ImageLayout.Zoom;
                 overlayForms[screenIndex].Show();  // show the form
                 screenIndex++; //next *clap* screen *clap*
@@ -191,6 +191,7 @@ namespace Gifshot.Forms
             }
             Variables.runningOverlayForms.Clear();
             this.Hide();
+            GlobalVariables.isMakingScreenshot = null;
             GC.Collect(); //clean RAM
 
         }
@@ -303,6 +304,23 @@ namespace Gifshot.Forms
             {
                 Func_saveImageBtn_Click(this, null);
             }
+            if (e.KeyCode == Keys.Escape)
+            {
+                MainForm.inst.DisableAllOverlays();
+            }
+            if (e.Alt)
+            {
+                MainForm.inst.DisableAllOverlays();
+            }
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e) //handler to prevent form from being closed on X
+        {
+            
+            DisableAllOverlays();
+            this.Hide();
+            if (e.CloseReason != CloseReason.ApplicationExitCall || e.CloseReason == CloseReason.WindowsShutDown)
+                e.Cancel = true;
         }
     }
 }

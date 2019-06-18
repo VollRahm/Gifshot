@@ -115,7 +115,7 @@
             this.func_copyToClipBoardBtn.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Turquoise;
             this.func_copyToClipBoardBtn.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Aquamarine;
             this.func_copyToClipBoardBtn.ForeColor = System.Drawing.Color.Transparent;
-            this.func_copyToClipBoardBtn.Location = new System.Drawing.Point(33, 1);
+            this.func_copyToClipBoardBtn.Location = new System.Drawing.Point(35, 1);
             this.func_copyToClipBoardBtn.Name = "func_copyToClipBoardBtn";
             this.func_copyToClipBoardBtn.Size = new System.Drawing.Size(35, 35);
             this.func_copyToClipBoardBtn.TabIndex = 2;
@@ -131,10 +131,12 @@
             this.Controls.Add(this.func_saveImageBtn);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.KeyPreview = true;
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "Gifshot";
             this.TopMost = true;
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Shown += new System.EventHandler(this.OptionsForm_Shown);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             this.notifContextMenu.ResumeLayout(false);

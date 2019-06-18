@@ -28,8 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OverlayForm));
+            this.selectAreaInfo = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
+            // 
+            // selectAreaInfo
+            // 
+            this.selectAreaInfo.AutoPopDelay = 5000;
+            this.selectAreaInfo.InitialDelay = 0;
+            this.selectAreaInfo.ReshowDelay = 0;
+            this.selectAreaInfo.UseAnimation = false;
+            this.selectAreaInfo.UseFading = false;
             // 
             // OverlayForm
             // 
@@ -52,5 +62,7 @@
         }
 
         #endregion
+
+        private System.Windows.Forms.ToolTip selectAreaInfo;
     }
 }
